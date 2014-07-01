@@ -1,0 +1,14 @@
+MAS people {
+
+	infrastructure: Centralised
+
+	environment: people.ENV(5)
+	agents:
+		dummy #5;
+		
+		//emma;
+		//jim;
+
+	aslSourcePath:
+		"src/asl";
+}
