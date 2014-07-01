@@ -1,0 +1,21 @@
+proposta dell’algoritmo:
+
+plain in agente deve essere ben definita.
+
+
+1. associare ad ogni agente una stringa myString in belief,
+2. calcola la confidenza di ciascun agente(differenza rispetto alla stringa giusta)
+2. ciclo for
+	generate un array di coppia degli agenti in casuale
+3. ciclo for
+	per ogni coppia, il primo .send(ilsecondo, tell, myConfidence) //addPercept
+4. il plain in ogni agente esegue il confronto, determina chi è leader,
+	informa l’altro, determinare la possibilita di learning e esegue il learning.
+5. accumula il risultato(servirebbe syncronize per la funzione di Java)
+
+
+
+
+?confidenza casuale?
+confidenza dell’agente cambia?
+?copia solo bit diversi?
