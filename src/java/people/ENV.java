@@ -56,8 +56,9 @@ public class ENV  extends Environment{
         addPercept("dummy1",col1Pos);
 		
 		generateChatRoom();
-		
-		
+		Couple p=getNextChat();
+		comunicate= Literal.parseLiteral("comunicate(\"dummy"+p.a+"\" , \"dummy"+p.b+"\")");
+		addPercept("dummy"+p.a,comunicate);
     }
     
 	Literal myString[];
@@ -110,7 +111,7 @@ public class ENV  extends Environment{
 	}
 	
 	
-	Couple getNextCouple(){
+	Couple getNextChat(){
 		Couple p;
 		if(chatRoom.size()>0){
 			p=chatRoom.get(0);
@@ -122,6 +123,8 @@ public class ENV  extends Environment{
 		}
 		return p;
 	}
+	
+	public static Literal comunicate;
 	
     @Override
     public boolean executeAction(String ag, Structure action) {
