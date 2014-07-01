@@ -4,9 +4,9 @@
 
 /* Initial goals */
 
-!start.
+/*
++myString(X):true <- .print(X).
 
-/* Plans */
++confidence(X):true <- .print("confidenza",X).*/
 
-+!start : true <- .print("hello world.").
-+newbe : true <- .print("hello world from newbe.").
++confidence(1):true <- .print("SONO ad 1").

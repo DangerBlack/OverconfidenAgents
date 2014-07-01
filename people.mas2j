@@ -2,9 +2,9 @@ MAS people {
 
 	infrastructure: Centralised
 
-	environment: people.ENV(5)
+	environment: people.ENV(10,0100000001)
 	agents:
-		dummy #5;
+		dummy #10;
 		
 		//emma;
 		//jim;

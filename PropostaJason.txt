@@ -19,3 +19,6 @@ plain in agente deve essere ben definita.
 ?confidenza casuale?
 confidenza dell’agente cambia?
 ?copia solo bit diversi?
+the high value of confidence; pagina 8 significato?
+
+
