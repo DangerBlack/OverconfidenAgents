@@ -26,7 +26,7 @@ public class ENV  extends Environment{
 	int nAgents=10;
 	String realString="0000000000";
 	int maxConfidence=9;
-	int minConfidence=1;
+	int minConfidence=8;
 	ArrayList<Couple> chatRoom;
 	
 	
@@ -36,6 +36,9 @@ public class ENV  extends Environment{
     public static final Literal sb  = Literal.parseLiteral("sip(beer)");
     public static final Literal hob = Literal.parseLiteral("has(couchPotato,beer)");
     public final String bs = new String("compare");
+	public final String hd = new String("hammingDistance");
+	public final String hde = new String("hammingDistanceEnv");
+	public final String us = new String("updateString");
     //compare(Num,MyStr)
 
     
@@ -126,6 +129,38 @@ public class ENV  extends Environment{
 	
 	public static Literal comunicate;
 	
+	public int hummingDistance(String s1,String s2){
+		
+		if(s1.length()!=s2.length()){
+			System.out.println("ERRORE: #001 STRINGHE DIVERSE "+s1+":"+s1.length()+" "+s2+":"+s2.length());
+		}
+		int dist=0;
+		for(int i=0;i<s1.length();i++){
+			if(s1.charAt(i)!=s2.charAt(i))
+				dist++;
+		}
+		return dist;
+	}
+	/**
+		s1: the main String of the Leader
+		s2: the String of the follower
+	*/
+	public String updateString(String s1,String s2){
+		String s="";
+		if(s1.length()!=s2.length()){
+			System.out.println("ERRORE: #002 STRINGHE DIVERSE "+s1+":"+s1.length()+" "+s2+":"+s2.length());
+		}
+		int dist=0;
+		for(int i=0;i<s1.length();i++){
+			if((s1.charAt(i)!=s2.charAt(i))&(dist<=qoL)){
+				dist++;
+				s+=""+s1.charAt(i);
+			}else{
+				s+=""+s2.charAt(i);
+			}
+		}
+		return s;		
+	}
     @Override
     public boolean executeAction(String ag, Structure action) {
         System.out.println("["+ag+"] doing: "+action);
@@ -136,6 +171,30 @@ public class ENV  extends Environment{
         	//example how env get information from agents when an action is performed
         	logger.info("Look!!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1));
         }
+		if (action.getFunctor().equals(hd)) {
+        	/*Calculating hammingDistance */
+			int distance=hummingDistance(action.getTerm(0).toString(),action.getTerm(1).toString());
+        	logger.info("Calculating HammingDistance !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" D="+distance);
+			
+			addPercept(ag,Literal.parseLiteral("distance("+distance+")"));
+        }
+		if (action.getFunctor().equals(hde)) {
+        	/*Calculating hammingDistance */
+			int distance=hummingDistance(action.getTerm(0).toString().replaceAll("\"",""),realString);
+        	logger.info("Calculating HammingDistanceENV !!! term1: "+action.getTerm(0)+" term2:"+realString+" D="+distance);
+			if(Math.random()*realString.length()>distance){
+				logger.info("Successo");
+				addPercept(ag,Literal.parseLiteral("result(success)"));
+			}else{
+				logger.info("Failure");
+				addPercept(ag,Literal.parseLiteral("result(failure)"));
+			}
+			//addPercept(ag,Literal.parseLiteral("distance("+distance+")"));
+        }
+		if (action.getFunctor().equals(us)) {
+			String newString=updateString(action.getTerm(0).toString(),action.getTerm(1).toString());
+			logger.info("Calculating updateString !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" "+newString);
+		}
         /**
  		if (action.equals(sb)) {
             result = sipBeer();
