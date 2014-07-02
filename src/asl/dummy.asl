@@ -14,19 +14,19 @@
 +comunicate(ME,YOU):confidence(Y) 
 					<- .print("Voglio parlare con ",YOU);
 						+me(ME);
-						+you(YOU);
+						-+you(YOU);
 						.send(YOU,tell,anotherConfidence(ME,Y)).
 
 +anotherConfidence(YOU,Y):confidence(X) & X>=Y
 					<- .print("Ho ricevuto la confidenza, sono il leader");
-						+you(YOU);
+						-+you(YOU);
 						.send(YOU,tell,leader(no));
 					   +leader(si).
 					   
 					
 +anotherConfidence(YOU,Y):confidence(X) & X<Y
 					<- .print("Ho ricevuto la confidenza, ",YOU," è il leader");
-					+you(YOU);
+					-+you(YOU);
 					.send(YOU,tell,leader(si));
 					+leader(no).
 					
@@ -49,7 +49,6 @@
 
 +workTogether(S2): myString(S1)
 				<-.print("Confronto con l'ambiente");
-					-workTogether(_)[source(_)];
 					hammingDistanceEnv(S1).
 					
 +result(success): workTogether(S2) & myString(S1)
@@ -69,19 +68,26 @@
 			   +concludeCommunication.
 
 +concludeCommunication: you(YOU)
-			<- 	-comunicate(_,_)[source(_)];
+			<- 	+resetBelief;
+				.send(YOU,tell,concludeCommunicationHard).
+
++resetBelief: true
+			<-	.print("CANCELLO LE MIE CREDENZE");
+				-comunicate(_,_)[source(_)];
 				-anotherConfidence(_,_)[source(_)];
 				-anotherString(_,_)[source(_)];
 				-distance(_)[source(_)];
 				-result(_)[source(_)];
 				-comunicateUpdate(_)[source(_)];
 				-updateMyString(_)[source(_)];
+				-workTogether(_)[source(_)];
 				-concludeCommunication(_)[source(_)];
-				-you(_)[source(_)];
 				-me(_)[source(_)];
-				.send(YOU,tell,concludeCommunicationHard).
-
-+concludeComunicationHard:true
-			<- 	+concludeComunication;
-				-concludeComunicationHard;
+				-you(_)[source(_)];
+				-leader(_)[source(_)];
+				-resetBelief[source(_)].
+				
++concludeCommunicationHard:true
+			<- 	+resetBelief;
+				-concludeCommunicationHard[source(_)];
 				speechConcluded.

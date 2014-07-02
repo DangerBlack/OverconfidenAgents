@@ -129,8 +129,10 @@ public class ENV  extends Environment{
 	}
 	public void doNextStep(){
 		if(step<nStep){
+			
 			Couple p=getNextChat();
 			comunicate= Literal.parseLiteral("comunicate(\"dummy"+p.a+"\" , \"dummy"+p.b+"\")");
+			logger.info("FACCIO LO STEP "+step+"/"+nStep+" ["+p.a+" => "+p.b+"]");
 			addPercept("dummy"+p.a,comunicate);
 		}
 	}
