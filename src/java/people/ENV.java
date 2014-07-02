@@ -21,7 +21,8 @@ public class ENV  extends Environment{
 		}
 	}
 	
-	int tick=10;
+	int nStep=10;
+	int step=0;
 	int qoL=3;
 	int nAgents=10;
 	String realString="0000000000";
@@ -39,6 +40,7 @@ public class ENV  extends Environment{
 	public final String hd = new String("hammingDistance");
 	public final String hde = new String("hammingDistanceEnv");
 	public final String us = new String("updateString");
+	public final String sc = new String("speechConcluded");
     //compare(Num,MyStr)
 
     
@@ -59,9 +61,7 @@ public class ENV  extends Environment{
         addPercept("dummy1",col1Pos);
 		
 		generateChatRoom();
-		Couple p=getNextChat();
-		comunicate= Literal.parseLiteral("comunicate(\"dummy"+p.a+"\" , \"dummy"+p.b+"\")");
-		addPercept("dummy"+p.a,comunicate);
+		doNextStep();
     }
     
 	Literal myString[];
@@ -109,8 +109,9 @@ public class ENV  extends Environment{
 		for(int i=0;i<(nAgents-1);i+=2)
 		{
 			chatRoom.add(new Couple(schatRoom.get(i),schatRoom.get(i+1)));
-			logger.info(""+chatRoom.get(i/2));
+			logger.info(""+chatRoom.get(chatRoom.size()-1));
 		}
+		step++;
 	}
 	
 	
@@ -126,7 +127,13 @@ public class ENV  extends Environment{
 		}
 		return p;
 	}
-	
+	public void doNextStep(){
+		if(step<nStep){
+			Couple p=getNextChat();
+			comunicate= Literal.parseLiteral("comunicate(\"dummy"+p.a+"\" , \"dummy"+p.b+"\")");
+			addPercept("dummy"+p.a,comunicate);
+		}
+	}
 	public static Literal comunicate;
 	
 	public int hummingDistance(String s1,String s2){
@@ -182,7 +189,10 @@ public class ENV  extends Environment{
         	/*Calculating hammingDistance */
 			int distance=hummingDistance(action.getTerm(0).toString().replaceAll("\"",""),realString);
         	logger.info("Calculating HammingDistanceENV !!! term1: "+action.getTerm(0)+" term2:"+realString+" D="+distance);
-			if(Math.random()*realString.length()>distance){
+			
+			double punteggio=Math.random()*realString.length();
+			logger.info("Punteggio "+punteggio+" / "+distance);
+			if(punteggio>distance){
 				logger.info("Successo");
 				addPercept(ag,Literal.parseLiteral("result(success)"));
 			}else{
@@ -194,6 +204,12 @@ public class ENV  extends Environment{
 		if (action.getFunctor().equals(us)) {
 			String newString=updateString(action.getTerm(0).toString(),action.getTerm(1).toString());
 			logger.info("Calculating updateString !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" "+newString);
+			addPercept(ag,Literal.parseLiteral("comunicateUpdate("+newString+")"));
+		}
+		if (action.getFunctor().equals(sc)) {
+			logger.info("Finito ");
+			doNextStep();
+			//clearPercepts(ag);
 		}
         /**
  		if (action.equals(sb)) {

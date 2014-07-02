@@ -44,12 +44,44 @@
 			   .send(YOU,tell,workTogether(S)).
 
 +distance(D): confidence(X) & D>=X
-			<- .print("La distanza è ",D," failure").
+			<- .print("La distanza è ",D," failure");
+				+concludeCommunication.
 
 +workTogether(S2): myString(S1)
 				<-.print("Confronto con l'ambiente");
+					-workTogether(_)[source(_)];
 					hammingDistanceEnv(S1).
 					
 +result(success): workTogether(S2) & myString(S1)
 			<- .print("E' stato un successo");
 			   updateString(S1,S2).
+
++result(failure):true
+			<- +concludeCommunication.
+			   
++comunicateUpdate(S): you(YOU)
+			<- .print("Aggiorna la tua credenza");
+				.send(YOU,tell,updateMyString(S)).
+
++updateMyString(S): true
+			<- .print("Aggiorno la stringa ",S);
+			   -+myString(S)[source(percept)];
+			   +concludeCommunication.
+
++concludeCommunication: you(YOU)
+			<- 	-comunicate(_,_)[source(_)];
+				-anotherConfidence(_,_)[source(_)];
+				-anotherString(_,_)[source(_)];
+				-distance(_)[source(_)];
+				-result(_)[source(_)];
+				-comunicateUpdate(_)[source(_)];
+				-updateMyString(_)[source(_)];
+				-concludeCommunication(_)[source(_)];
+				-you(_)[source(_)];
+				-me(_)[source(_)];
+				.send(YOU,tell,concludeCommunicationHard).
+
++concludeComunicationHard:true
+			<- 	+concludeComunication;
+				-concludeComunicationHard;
+				speechConcluded.
