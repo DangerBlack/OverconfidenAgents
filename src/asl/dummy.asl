@@ -1,5 +1,3 @@
-// Agent dummy in project people
-
 /* Initial beliefs and rules */
 
 /* Initial goals */
