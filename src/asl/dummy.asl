@@ -21,14 +21,16 @@
 					<- .print("Ho ricevuto la confidenza, sono il leader");
 						-+you(YOU);
 						.send(YOU,tell,leader(no));
-					   +leader(si).
+						+leader(si).
+					   
 					   
 					
 +anotherConfidence(YOU,Y):confidence(X) & X<Y
 					<- .print("Ho ricevuto la confidenza, ",YOU," è il leader");
 					-+you(YOU);
-					.send(YOU,tell,leader(si));
-					+leader(no).
+					+leader(no);
+					.send(YOU,tell,leader(si)).
+					
 					
 			
 +leader(si): you(YOU) & myString(S)
@@ -38,7 +40,10 @@
 +anotherString(YOU,S2): myString(S1) & leader(no)
 			<- .print("Ho ricevuto la stringa voglio confrontarle ",S1," =?= ",S2);
 				hammingDistance(S1,S2).
-
+				
++anotherString(YOU,S2): myString(S1)
+			<- .print("WTF ",S1," =?= ",S2).
+			
 +distance(D): confidence(X) & D<X & you(YOU) & myString(S)
 			<- .print("La distanza è ",D," vogliamo lavorare insieme");
 			   .send(YOU,tell,workTogether(S)).
@@ -85,7 +90,8 @@
 				-me(_)[source(_)];
 				-you(_)[source(_)];
 				-leader(_)[source(_)];
-				-resetBelief[source(_)].
+				-resetBelief[source(_)];
+				.print("****CANCELLATE LE MIE CREDENZE").
 				
 +concludeCommunicationHard:true
 			<- 	+resetBelief;
