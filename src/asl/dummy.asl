@@ -26,6 +26,7 @@
 					
 +anotherConfidence(YOU,Y):confidence(X) & X<Y
 					<- .print("Ho ricevuto la confidenza, ",YOU," è il leader");
+					+you(YOU);
 					.send(YOU,tell,leader(si));
 					+leader(no).
 					
