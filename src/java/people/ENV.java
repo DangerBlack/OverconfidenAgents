@@ -272,7 +272,7 @@ public class ENV  extends Environment{
 		return dist;
 	}
 	
-	public String getQoLSring(String s1,String s2){
+	public String getQoLString(String s1,String s2){
 		if(!shouldBlindCopy)
 			return getQoLStringFixed(s1,s2);
 		else
