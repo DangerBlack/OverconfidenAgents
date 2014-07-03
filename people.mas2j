@@ -2,12 +2,12 @@ MAS people {
 
 	infrastructure: Centralised
 
-	environment: people.ENV(10,0100000001)
+	environment: people.ENV(100)
 	
 	//executionControl: jason.control.ExecutionControl
 	
 	agents:
-		dummy #10;
+		dummy #100;
 
 	aslSourcePath:
 		"src/asl";

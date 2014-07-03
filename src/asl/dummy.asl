@@ -43,11 +43,11 @@
 			<- printj("WTF ",S1," =?= ",S2).
 
 /* string distance */			
-+distance(D): myConfidence(X) & D<X & you(YOU) & myString(S)
++distance(D): myConfidence(X) & D<=X & you(YOU) & myString(S)
 			<- printj("La distanza � ",D," vogliamo lavorare insieme");
 			   .send(YOU,tell,workTogether(S)).
 
-+distance(D): myConfidence(X) & D>=X
++distance(D): myConfidence(X) & D>X
 			<- printj("La distanza � ",D," failure");
 				concludeCommunication.
 /* work trigger */

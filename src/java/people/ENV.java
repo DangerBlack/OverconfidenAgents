@@ -59,19 +59,19 @@ public class ENV  extends Environment{
      * ====================================================
      * */
 	
-	int nStep=250;
+	int nStep=500;
 	int step=0;
 	int qoL=5;
 	int nAgents;
-	String realString="0000000000";
-	int maxConfidence=5;
-	int minConfidence=5;
+	String realString="";
+	int maxConfidence=4;
+	int minConfidence=4;
 	int readyAgent = 0;
 	/**
 	*TRUE if only qoL different bit from the beginning are modified between the two string
 	*FALSE if qoL random bit are modified between the two string	
 	*/
-	boolean shouldBlindCopy=false;
+	boolean shouldBlindCopy=true;
 	
 	ArrayList<Couple> coupleList;
 	ArrayList<Agent> agentList;
@@ -101,7 +101,7 @@ public class ENV  extends Environment{
     	
     	logger.info("STARTing SIMULATION: \n num of agents "+args[0]);
 		nAgents=Integer.parseInt(args[0]);
-		realString=args[1];
+		realString=generateString();
 		logger.info("realString "+realString);
 		agentList = new ArrayList<Agent>();
 		
@@ -160,17 +160,17 @@ public class ENV  extends Environment{
 			double punteggio=Math.random()*realString.length();
 			//logger.info("Punteggio "+punteggio+" / "+distance);
 			if(punteggio>distance){
-				logger.info("Successo "+ag+" "+getCoupleByAgentName(ag).a+" <=> "+getCoupleByAgentName(ag).b);
+				//logger.info("Successo "+ag+" "+getCoupleByAgentName(ag).a+" <=> "+getCoupleByAgentName(ag).b);
 				addPercept(ag,Literal.parseLiteral("result(success)"));
 			}else{
-				logger.info("Failure");
+				//logger.info("Failure");
 				addPercept(ag,Literal.parseLiteral("result(failure)"));
 			}
         }
 		if (action.getFunctor().equals(us)) {
 			String newString=getQoLString(action.getTerm(0).toString(),action.getTerm(1).toString());
 			updateEnvCopiedStringByAgentName(ag,newString);
-			logger.info("Calculating updateString !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" "+newString);
+			//logger.info("Calculating updateString !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" "+newString);
 			addPercept(ag,Literal.parseLiteral("communicateUpdate("+newString+")"));
 		}
 		if (action.getFunctor().equals(cc)) {
@@ -289,7 +289,7 @@ public class ENV  extends Environment{
 		}
 		int dist=0;
 		for(int i=0;i<s1.length();i++){
-			if((s1.charAt(i)!=s2.charAt(i))&(dist<=qoL)){
+			if((s1.charAt(i)!=s2.charAt(i))&(dist<qoL)){
 				dist++;
 				s+=""+s1.charAt(i);
 			}else{
@@ -314,8 +314,13 @@ public class ENV  extends Environment{
 			c[i]=s2.charAt(i);
 		}
 		int dist=0;
+		ArrayList<Integer> prec=new ArrayList<Integer>();
 		for(int i=0;i<qoL;i++){
-			int pos=(int)Math.round((Math.random()*s2.length()));
+			int pos;
+			do{
+				pos=(int)(Math.random()*s2.length());
+			}while(prec.indexOf(new Integer(pos))!=-1);
+			
 			c[pos]=s1.charAt(pos);
 		}		
 		for(int i=0;i<s1.length();i++){
@@ -332,11 +337,13 @@ public class ENV  extends Environment{
 			Agent a = agentList.get(i);
 			int d=getHummingDistance(a.myString.replaceAll("\"",""),realString);
 			media+=d;
-			//if(step%5==0)
+			if(step%20==0)
 				logger.info("DUMMY"+(i+1)+": myString: "+a.myString+", myConfidence: "+a.myConfidence+" D="+d);
 		}
 		media=media/agentList.size();
-		logger.info("Distanza media: "+media);
+		if(step%20==0)
+			logger.info("realString: "+realString);
+		logger.info("Distanza media: "+(realString.length()-media));
 		logger.info("===============  END AGENTE REPORT ==============");
 		 
 	}
