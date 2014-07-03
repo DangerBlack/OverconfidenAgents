@@ -67,6 +67,11 @@ public class ENV  extends Environment{
 	int maxConfidence=5;
 	int minConfidence=5;
 	int readyAgent = 0;
+	/**
+	*TRUE if only qoL different bit from the beginning are modified between the two string
+	*FALSE if qoL random bit are modified between the two string	
+	*/
+	boolean shouldBlindCopy=false;
 	
 	ArrayList<Couple> coupleList;
 	ArrayList<Agent> agentList;
@@ -266,11 +271,18 @@ public class ENV  extends Environment{
 		}
 		return dist;
 	}
+	
+	public String getQoLSring(String s1,String s2){
+		if(!shouldBlindCopy)
+			return getQoLStringFixed(s1,s2);
+		else
+			return getQoLStringRandom(s1,s2);
+	}
 	/**
 		s1: the main String of the Leader
 		s2: the String of the follower
 	*/
-	public String getQoLString(String s1,String s2){
+	public String getQoLStringFixed(String s1,String s2){
 		String s="";
 		if(s1.length()!=s2.length()){
 			System.out.println("ERRORE: #002 STRINGHE DIVERSE "+s1+":"+s1.length()+" "+s2+":"+s2.length());
@@ -283,6 +295,31 @@ public class ENV  extends Environment{
 			}else{
 				s+=""+s2.charAt(i);
 			}
+		}
+		return s;		
+	}
+	
+	
+	/**
+		s1: the main String of the Leader
+		s2: the String of the follower
+	*/
+	public String getQoLStringRandom(String s1,String s2){
+		String s="";
+		if(s1.length()!=s2.length()){
+			System.out.println("ERRORE: #003 STRINGHE DIVERSE "+s1+":"+s1.length()+" "+s2+":"+s2.length());
+		}
+		char c[]=new char[s2.length()];
+		for(int i=0;i<s1.length();i++){
+			c[i]=s2.charAt(i);
+		}
+		int dist=0;
+		for(int i=0;i<qoL;i++){
+			int pos=(int)Math.round((Math.random()*s2.length()));
+			c[pos]=s1.charAt(pos);
+		}		
+		for(int i=0;i<s1.length();i++){
+			s+=""+c[i];
 		}
 		return s;		
 	}
