@@ -59,13 +59,13 @@ public class ENV  extends Environment{
      * ====================================================
      * */
 	
-	int nStep=3;
+	int nStep=250;
 	int step=0;
-	int qoL=3;
+	int qoL=5;
 	int nAgents;
 	String realString="0000000000";
-	int maxConfidence=9;
-	int minConfidence=8;
+	int maxConfidence=5;
+	int minConfidence=5;
 	int readyAgent = 0;
 	
 	ArrayList<Couple> coupleList;
@@ -81,7 +81,7 @@ public class ENV  extends Environment{
 	public final String us = new String("updateString");
 	public final String cc = new String("concludeCommunication");
 	public final String ir = new String("informReady");
-	
+	public final String pj = new String("printj");
 
     static Logger logger = Logger.getLogger(ENV.class.getName());
     
@@ -137,25 +137,25 @@ public class ENV  extends Environment{
 	
     @Override
     public boolean executeAction(String ag, Structure action) {
-        System.out.println("["+ag+"] doing: "+action);
+        //System.out.println("["+ag+"] doing: "+action);
         
         boolean result = true;
 		if (action.getFunctor().equals(hd)) {
         	/*Calculating hammingDistance */
 			int distance=getHummingDistance(action.getTerm(0).toString(),action.getTerm(1).toString());
-        	logger.info("Calculating HammingDistance !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" D="+distance);
+        	//logger.info("Calculating HammingDistance !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" D="+distance);
 			
 			addPercept(ag,Literal.parseLiteral("distance("+distance+")"));
         }
 		if (action.getFunctor().equals(hde)) {
         	/*Calculating hammingDistance */
 			int distance=getHummingDistance(action.getTerm(0).toString().replaceAll("\"",""),realString);
-        	logger.info("Calculating HammingDistanceENV !!! term1: "+action.getTerm(0)+" term2:"+realString+" D="+distance);
+        	//logger.info("Calculating HammingDistanceENV !!! term1: "+action.getTerm(0)+" term2:"+realString+" D="+distance);
 			
 			double punteggio=Math.random()*realString.length();
-			logger.info("Punteggio "+punteggio+" / "+distance);
+			//logger.info("Punteggio "+punteggio+" / "+distance);
 			if(punteggio>distance){
-				logger.info("Successo");
+				logger.info("Successo "+ag+" "+getCoupleByAgentName(ag).a+" <=> "+getCoupleByAgentName(ag).b);
 				addPercept(ag,Literal.parseLiteral("result(success)"));
 			}else{
 				logger.info("Failure");
@@ -171,7 +171,7 @@ public class ENV  extends Environment{
 		if (action.getFunctor().equals(cc)) {
 			//a conversation is finished 
 			Couple p = getCoupleByAgentName(ag);
-			if(!p.finished){
+			if(!p.finished){              
 				addPercept("dummy"+p.a,Literal.parseLiteral("reset(belief)"));
 				addPercept("dummy"+p.b,Literal.parseLiteral("reset(belief)"));
 				p.finished = true;
@@ -180,6 +180,9 @@ public class ENV  extends Environment{
 		if (action.getFunctor().equals(ir)) {
 			//an agent cleaned his belief
 			incrementReadyAgent();
+		}
+		if (action.getFunctor().equals(pj)) {
+			
 		}
         return result;
     }   
@@ -197,7 +200,7 @@ public class ENV  extends Environment{
 		{
     		Couple p = coupleList.get(i);
     		communicate= Literal.parseLiteral("communicate(\"dummy"+p.a+"\" , \"dummy"+p.b+"\")");
-			logger.info("ENV Starts a conversation: "+step+"/"+nStep+" ["+p.a+" => "+p.b+"]");
+			//logger.info("ENV Starts a conversation: "+step+"/"+nStep+" ["+p.a+" => "+p.b+"]");
 			addPercept("dummy"+p.a,communicate);
 		}
     }
@@ -205,13 +208,13 @@ public class ENV  extends Environment{
     //when a agent ends a conversation
 	synchronized void incrementReadyAgent(){
 		readyAgent++;
-		logger.info("number of ready agents: "+readyAgent+"/"+nAgents);
+		//logger.info("number of ready agents: "+readyAgent+"/"+nAgents);
 		if(readyAgent == nAgents){
 			if(step <nStep){
 			
-				logger.info("ENV Starts Group Conversation: "+step+"/"+nStep);
+				//logger.info("ENV Starts Group Conversation: "+step+"/"+nStep);
 				step++;
-				logger.info("goin to restart chat cyclte ");
+				//logger.info("goin to restart chat cyclte ");
 				readyAgent = 0;
 				
 				clearAllPercepts();
@@ -241,12 +244,12 @@ public class ENV  extends Environment{
 		for(int i = 0 ; i< coupleList.size(); i++){
 			p=coupleList.get(i);
 			if(dummy.equals("dummy"+p.a) || dummy.equals("dummy"+p.b)){
-				logger.info("trovato");
+				//logger.info("trovato");
 				return p;
 			}
 			
 		}
-		logger.info("nn trovato");
+		//logger.info("nn trovato");
 			return null;
 		
 	}
@@ -285,12 +288,20 @@ public class ENV  extends Environment{
 	}
 	
 	void printAgentsPossession(){
-		logger.info("===============  START AGENTE REPORT ==============");
+		double media=0;
+		 
+		logger.info("===============  START AGENTE REPORT ["+step+"/"+nStep+"]==========");
 		for(int i = 0 ; i< agentList.size(); i++){
 			Agent a = agentList.get(i);
-			logger.info("DUMMY"+i+": myString: "+a.myString+", myConfidence: "+a.myConfidence);
+			int d=getHummingDistance(a.myString.replaceAll("\"",""),realString);
+			media+=d;
+			//if(step%5==0)
+				logger.info("DUMMY"+(i+1)+": myString: "+a.myString+", myConfidence: "+a.myConfidence+" D="+d);
 		}
+		media=media/agentList.size();
+		logger.info("Distanza media: "+media);
 		logger.info("===============  END AGENTE REPORT ==============");
+		 
 	}
 	
     /*
@@ -310,7 +321,7 @@ public class ENV  extends Environment{
 		for(int i=0;i<(nAgents-1);i+=2)
 		{
 			coupleList.add(new Couple(scoupleList.get(i),scoupleList.get(i+1)));
-			logger.info(""+coupleList.get(coupleList.size()-1));
+			//logger.info(""+coupleList.get(coupleList.size()-1));
 		}
 	}
     
