@@ -3,11 +3,11 @@ MAS people {
 	infrastructure: Centralised
 
 	environment: people.ENV(10,0100000001)
+	
+	//executionControl: jason.control.ExecutionControl
+	
 	agents:
 		dummy #10;
-		
-		//emma;
-		//jim;
 
 	aslSourcePath:
 		"src/asl";
