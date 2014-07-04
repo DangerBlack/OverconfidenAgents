@@ -17,7 +17,7 @@ import jason.environment.Environment;
 
 import java.util.logging.Logger;
 import java.util.*;
-
+import java.io.*;
 
 public class ENV  extends Environment{
 	
@@ -29,8 +29,9 @@ public class ENV  extends Environment{
      * */
 	
 	//System parameters
-	int nStep=200;
+	int nStep=1000;
 	int step=0;
+	int stringLenght=10;
 	int qoL=5;
 	int maxConfidence=4;
 	int minConfidence=4;
@@ -65,7 +66,7 @@ public class ENV  extends Environment{
 
     static Logger logger = Logger.getLogger(ENV.class.getName());
     
-	
+	public SaveTrace save;
     /*
      * ====================================================
      *  		classes
@@ -98,6 +99,32 @@ public class ENV  extends Environment{
 		}
 	}
 	
+	public class SaveTrace{
+		String path="";
+		String fileName="";
+		PrintWriter output;
+		public SaveTrace(){
+			try{
+			int n=0;
+			File f;
+			do{
+				fileName="trace-"+n+"-"+qoL+"-"+nStep+"-"+nAgents+".txt";			
+				f=new File(path+fileName);
+				n++;
+			}while(f.exists());
+			
+			output=new PrintWriter(f);
+			}catch(FileNotFoundException e){
+				logger.info("Error #005 Unable to save file");
+			}
+		}
+		public void close(){
+			output.close();
+		}
+		public void print(int step,double value){
+			output.println(step+"	"+value);
+		}
+	}
     
     /*
      * ====================================================
@@ -116,10 +143,12 @@ public class ENV  extends Environment{
 		agentList = new ArrayList<Agent>();
 		
         initPercepts();
+		save=new SaveTrace();
         printAgentsPossession();
         generateCoupleList();
+		
 		startACycle();
-
+		
     }
     
 	
@@ -382,7 +411,9 @@ public class ENV  extends Environment{
 		media=media/agentList.size();
 		logger.info("Distanza media: "+(realString.length()-media));
 		logger.info("=============== END AGENTE REPORT [GOAL ORIENTED VERSION] ==============");
-		 
+		save.print(step,(realString.length()-media));
+		if(step>=nStep)
+			save.close();
 	}
 	
     /*
@@ -412,7 +443,7 @@ public class ENV  extends Environment{
 
     String generateString(){
 		String s="";
-		for(int i=0;i<10;i++){
+		for(int i=0;i<stringLenght;i++){
 			if(Math.random()>0.5){
 				s+="0";
 			}else{
