@@ -3,7 +3,7 @@
  * PROGETTO DI Simulazione di sistemi Mod2
  * Anno Accademico 2013/2014
  *
- * Agent ASL
+ * Agent ASL, unique one for both Teacher & Student
  * 
  * @author Baschieri Daniele, daniele.baschieri@studio.unibo.it
  * @author Liu Tong, tong.liu2@studio.unibo.it
@@ -108,7 +108,6 @@
 	hummingDistanceEnv(TEACHERSTRING). 
 
 
-
 -!learn:true
 <- .print("I do not have the teacher string any more how can proceed learning !?"); concludeCommunication. 
 		
@@ -129,7 +128,7 @@
 			
 
 
-/* STUDENTE: update my knowledge */			
+/* STUDENTE: successfully integrated the knowledge */			
 +newKnowledge(NEWSTRING)[source(Percepts)]:true <-  -+myString(NEWSTRING);concludeCommunication.
 
 
