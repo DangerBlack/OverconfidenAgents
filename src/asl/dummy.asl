@@ -1,98 +1,147 @@
-/* Initial beliefs and rules */
+/**
+ * ALMA MATER STUDIORUM BOLOGNA - Universita' degli Studi di Bologna
+ * PROGETTO DI Simulazione di sistemi Mod2
+ * Anno Accademico 2013/2014
+ *
+ * Agent ASL
+ * 
+ * @author Baschieri Daniele, daniele.baschieri@studio.unibo.it
+ * @author Liu Tong, tong.liu2@studio.unibo.it
+ * @version  0.9
+ */
 
-/* Initial goals */
 
 
-+receiveString(X):true <- +myString(X);printj(X).
+/* Initial believes will be added when agents receive notification from the environment */
 
-+receiveConfidence(X):true <- +myConfidence(X);printj("confidenza",X).
++receiveString(X):true <- +myString(X).
 
-/* start */
-+communicate(ME,YOU):myConfidence(Y) 
-					<- printj("===New conversation started successfully=== \n Voglio parlare con ",YOU);
-						+me(ME);
++receiveConfidence(X):true <- +myConfidence(X).
+
+
+/* Agent receive notification from environment, goals are triggered ... */
+
++communicate(ME,YOU)[source(Percepts)]:true
+					<-  +me(ME);
 						+you(YOU);
-						.send(YOU,tell,anotherConfidence(ME,Y)).
-
-/* exchange confidence */
-+anotherConfidence(YOU,Y):myConfidence(X) & X>=Y
-					<- printj("Ho ricevuto la confidenza, sono il leader");
+						!startALesson.
+						
++!startALesson:true
+					<-  ?me(ME);
+						?you(YOU);
+						?myConfidence(Y);
+						.send(YOU,achieve,teachMe(ME,Y)).
+	
+-!startALesson:true		
+						<- .print("Oh no! I cannot start the conversation because I do not know the roles and my confidence!"); 
+						concludeCommunication.
+									
+									
+									
+/* TEACHER: I feel like to be the teacher! I inform you, you are not the teacher */
++!teachMe(YOU,Y):myConfidence(X) & X>=Y
+					<-  printj("I am the teacher beacause I am more confident than the student ",YOU);
 						+you(YOU);
-						.send(YOU,tell,leader(no));
-						+leader(si).
+						.send(YOU,tell,teacher(no));
+						+teacher(yes).
+									
+										
 					   					   
+/* STUDENT: I am not confident enough and I invite you to be the teacher */					
+-!teachMe(YOU,Y): true
+					<- printj("Unfortunately I am not confident enough to be the teacher ");
+					   +you(YOU);
+					   +teacher(no);
+					   .send(YOU,tell,teacher(yes)).
+					  				
 					
-+anotherConfidence(YOU,Y):myConfidence(X) & X<Y
-					<- printj("Ho ricevuto la confidenza, ",YOU," � il leader");
-					+you(YOU);
-					+leader(no);
-					.send(YOU,tell,leader(si)).
 					
-					
-/* leader trigger */			
-+leader(si): you(YOU) & myString(S)
-			<- printj("Leader invia la Stringa a ",YOU," leader ",S);
-			   .send(YOU,tell,anotherString(YOU,S)).
+/* TEACHER: let's first see if you are interested in my string then try to learn it */			
++teacher(yes): true
+			<- 	?you(YOU); ?myString(TEACHERSTRING);
+				printj("TEACHER sends ",YOU," his string: ",TEACHERSTRING);
+			    .send(YOU,achieve,getInterestDistance(TEACHERSTRING)).
 
-/* exchange string */
-+anotherString(YOU,S2): myString(S1) & leader(no)
-			<- printj("Ho ricevuto la stringa voglio confrontarle ",S1," =?= ",S2);
-				hammingDistance(S1,S2).
+
+
+/* STUDENT: now I need to calculate the humming distance */
++!getInterestDistance(TEACHERSTRING): teacher(no)
+			<-  ?myString(MYSTRING);
+				+teacherString(TEACHERSTRING);
+				printj("now I need to calculate the humming distance ",MYSTRING," =?= ",TEACHERSTRING);
+				hummingDistance(MYSTRING,TEACHERSTRING).
+					
 				
-+anotherString(YOU,S2): myString(S1)
-			<- printj("WTF ",S1," =?= ",S2).
+-!getInterestDistance(_): true
+			<- .print("WTF ERROR i am the teacher but i have been ask to calculate distance! That is odd! ",S1," =?= ",S2).
 
-/* string distance */			
-+distance(D): myConfidence(X) & D<=X & you(YOU) & myString(S)
-			<- printj("La distanza � ",D," vogliamo lavorare insieme");
-			   .send(YOU,tell,workTogether(S)).
 
-+distance(D): myConfidence(X) & D>X
-			<- printj("La distanza � ",D," failure");
-				concludeCommunication.
-/* work trigger */
-+workTogether(S2): myString(S1)
-				<-printj("Confronto con l'ambiente");
-					hammingDistanceEnv(S1).
 
-/* working result */					
-+result(success): workTogether(S2) & myString(S1)
-			<- printj("E' stato un successo");
-			   updateString(S1,S2).
+/* STUDENT: I received the distance result */
++interestDistance(D)[source(Percepts)]: true <- !decideToLearn.
 
-+result(failure):true
-			<- concludeCommunication.
+
+
+/* STUDENT: decide whether to learn */
++!decideToLearn :true
+	        <- 	?areWeSimilarEnough;
+				!learn.
+
+
+
+/* STUDENT: we are not similar */
+-!decideToLearn: true
+		<-	printj("i am NOT interested");  
+		concludeCommunication.
+
+
+
+/* STUDENT: test the similarity */
++?areWeSimilarEnough:interestDistance(D) &  myConfidence(X) & D<=X 
+<- printj("distance ", D ,"<= my confidence" ,X," i am interested to learn ").
+
+
+
+/* STUDENTE: learn */
++!learn:true
+<- ?teacherString(TEACHERSTRING);
+	hummingDistanceEnv(TEACHERSTRING). 
+
+
+
+-!learn:true
+<- .print("I do not have the teacher string any more how can proceed learning !?"); concludeCommunication. 
+		
+
+
+/* STUDENTE: learning outcome  */		
++result(OUTCOME)[source(Percepts)]: true
+			<- !integrateNewKnowledge.
+			
+			
+/* STUDENTE: integrate parts of teacher string to my knowledge */			
++!integrateNewKnowledge:true
+			<- 	?result(success);
+				?teacherString(TEACHERSTRING);?myString(MYSTRING); 
+			    getNewString(TEACHERSTRING,MYSTRING).
+			    
+-!integrateNewKnowledge:true <- printj("i am not able to learn that! ");  concludeCommunication.
 			
 
-/* update results */			   
-+communicateUpdate(S): you(YOU)
-			<- printj("Aggiorna la tua credenza del mio partner");
-				.send(YOU,tell,updateMyString(S)).
 
-+updateMyString(S): true
-			<- printj("Aggiorno la mia stringa ",S);
-			   -+myString(S);
-			   concludeCommunication.
+/* STUDENTE: update my knowledge */			
++newKnowledge(NEWSTRING)[source(Percepts)]:true <-  -+myString(NEWSTRING);concludeCommunication.
 
 
-/* reset believes */
-+reset(belief): true
+
+/* TEACHER & STUDENT reset believes */
++reset(belief)[source(Percepts)]: true
 			<- printj("CANCELLO LE MIE CREDENZE");
-				-communicate(_,_)[source(_)];
-				-anotherConfidence(_,_)[source(_)];
-				-anotherString(_,_)[source(_)];
-				-distance(_)[source(_)];
-				-result(success)[source(_)];
-				-result(failure)[source(_)];
-				-result(_)[source(_)];
-				-communicateUpdate(_)[source(_)];
-				-updateMyString(_)[source(_)];
-				-workTogether(_)[source(_)];
-				-concludeCommunication(_)[source(_)];
+				-teacherString(_)[source(_)];
 				-me(_)[source(_)];
 				-you(_)[source(_)];
-				-leader(_)[source(_)];
+				-teacher(_)[source(_)];
 				-resetBelief[source(_)];
-				 
+				-communicate(_,_)[source(_)]; 
 				printj("****CANCELLATE LE MIE CREDENZE");
 				informReady.
