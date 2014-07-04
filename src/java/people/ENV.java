@@ -59,7 +59,7 @@ public class ENV  extends Environment{
      * ====================================================
      * */
 	
-	int nStep=500;
+	int nStep=300;
 	int step=0;
 	int qoL=5;
 	int nAgents;
@@ -75,7 +75,22 @@ public class ENV  extends Environment{
 	
 	ArrayList<Couple> coupleList;
 	ArrayList<Agent> agentList;
-	
+    String[] stringList =  {
+    		"1010011000","0010000110","0100111000","1011110000","1111111011","0110110000","0110010100",
+    		"1110010011","1110011011","0101001001","0110101000","1000101001","1001110111","0000001000",
+    		"0101100110","0110010001","0001111111","0010000000","0000010011","0101001101","1110101010",
+    		"0001100100","1101001100","1100100111","0111011100","1101001100","0111110101","0000000110",
+    		"0011111101","0110111101","0111001101","1001010001","1100100110","1100111101","1101010010",
+    		"0010001010","0110111011","1100001000","0100101110","0011001100","1001011110","1011001011",
+    		"0000000000","1010001000","0000111001","0100001010","0001010011","0011010000","1011000111",
+    		"0000000011","1010101011","0111111001","0101110100","1000001001","0100010001","1110011000",
+    		"1101000101","0111101101","0010010011","1110000101","1100110100","1100000010","0100110101",
+    		"0011111111","0010111000","1111111101","0110011010","0101001010","0111011001","0100100010",
+    		"1000111100","1100101010","0111001111","1011100101","1011010110","0010000111","0101010111",
+    		"0011000001","0011001111","1000011101","1111010011","1010001100","0101000100","1100111000",
+    		"0010001101","0001110100","0010011010","1100110000","1011011100","1101110000","0001001010",
+    		"0111101101","0001100001","0111100101","1010111100","1001100001","0101000001","0011110100",
+    		"0001110001","0001001011"};
 
     // common literals
 	public static Literal communicate;
@@ -87,6 +102,7 @@ public class ENV  extends Environment{
 	public final String cc = new String("concludeCommunication");
 	public final String ir = new String("informReady");
 	public final String pj = new String("printj");
+	
 
     static Logger logger = Logger.getLogger(ENV.class.getName());
     
@@ -101,7 +117,11 @@ public class ENV  extends Environment{
     	
     	logger.info("STARTing SIMULATION: \n num of agents "+args[0]);
 		nAgents=Integer.parseInt(args[0]);
+		
+		//TEST ARC COMPARISON
 		realString=generateString();
+		//realString= "0100100110";
+		
 		logger.info("realString "+realString);
 		agentList = new ArrayList<Agent>();
 		
@@ -118,9 +138,14 @@ public class ENV  extends Environment{
 		myString=new Literal[nAgents];
 		confidence=new Literal[nAgents];
 		
-		for(int i=1;i<=nAgents;i++){
+		for(int i=1;i<=nAgents;i++){			
+			
+			//TEST ARC COMPARISON
 			String aS = generateString();
+			//String aS = stringList[i-1];
+			
 			int aC = generateConfidence();
+			
 			myString[i-1]= Literal.parseLiteral("receiveString(\""+aS+"\")");
 			addPercept("dummy"+i,myString[i-1]);
 			
@@ -157,7 +182,7 @@ public class ENV  extends Environment{
 			int distance=getHummingDistance(action.getTerm(0).toString().replaceAll("\"",""),realString);
         	//logger.info("Calculating HammingDistanceENV !!! term1: "+action.getTerm(0)+" term2:"+realString+" D="+distance);
 			
-			double punteggio=Math.random()*realString.length();
+			int punteggio=(int)(Math.random()*realString.length());
 			//logger.info("Punteggio "+punteggio+" / "+distance);
 			if(punteggio>distance){
 				//logger.info("Successo "+ag+" "+getCoupleByAgentName(ag).a+" <=> "+getCoupleByAgentName(ag).b);
@@ -169,7 +194,7 @@ public class ENV  extends Environment{
         }
 		if (action.getFunctor().equals(us)) {
 			String newString=getQoLString(action.getTerm(0).toString(),action.getTerm(1).toString());
-			updateEnvCopiedStringByAgentName(ag,newString);
+			updateAnotherEnvCopiedStringByAgentName(ag,newString);
 			//logger.info("Calculating updateString !!! term1: "+action.getTerm(0)+" term2:"+action.getTerm(1)+" "+newString);
 			addPercept(ag,Literal.parseLiteral("communicateUpdate("+newString+")"));
 		}
@@ -235,6 +260,15 @@ public class ENV  extends Environment{
 	void updateEnvCopiedStringByAgentName(String dummy,String newString){
 		int dummyIndex = Integer.parseInt(dummy.replaceAll("dummy", ""));
 		Agent a = agentList.get(dummyIndex-1);
+		a.myString = newString;
+	}
+	
+	void updateAnotherEnvCopiedStringByAgentName(String dummy,String newString){
+		Couple p =  getCoupleByAgentName(dummy);
+		int dummyIndex = Integer.parseInt(dummy.replaceAll("dummy", ""));
+		int anotherIdx = (p.a == dummyIndex)? p.b : p.a;
+		
+		Agent a = agentList.get(anotherIdx-1);
 		a.myString = newString;
 	}
 	
@@ -313,7 +347,6 @@ public class ENV  extends Environment{
 		for(int i=0;i<s1.length();i++){
 			c[i]=s2.charAt(i);
 		}
-		int dist=0;
 		ArrayList<Integer> prec=new ArrayList<Integer>();
 		for(int i=0;i<qoL;i++){
 			int pos;
@@ -341,10 +374,12 @@ public class ENV  extends Environment{
 				logger.info("DUMMY"+(i+1)+": myString: "+a.myString+", myConfidence: "+a.myConfidence+" D="+d);
 		}
 		media=media/agentList.size();
-		if(step%20==0)
+		if(step%20==0){
 			logger.info("realString: "+realString);
+			
+		}
 		logger.info("Distanza media: "+(realString.length()-media));
-		logger.info("===============  END AGENTE REPORT ==============");
+		logger.info("===============  BELIEF ORIENTED VERSION END AGENTE REPORT ==============");
 		 
 	}
 	
