@@ -31,7 +31,7 @@ public class ENV  extends Environment{
 	int nStep=1000;
 	int step=0;
 	int qoL=5;
-	int maxConfidence=4;
+	int maxConfidence=4;//4 7 9
 	int minConfidence=4;
 	boolean debugMode = false;
 	/**
@@ -55,8 +55,8 @@ public class ENV  extends Environment{
 	public static Literal communicate;
 	Literal myString[];
 	Literal confidence[];
-	public final String hd = new String("hummingDistance");
-	public final String hde = new String("hummingDistanceEnv");
+	public final String hd = new String("hammingDistance");
+	public final String hde = new String("hammingDistanceEnv");
 	public final String gns = new String("getNewString");
 	public final String cc = new String("concludeCommunication");
 	public final String ir = new String("informReady");
@@ -105,7 +105,7 @@ public class ENV  extends Environment{
 			int n=0;
 			File f;
 			do{
-				fileName="trace-"+n+"-"+qoL+"-"+nStep+"-"+nAgents+".txt";			
+				fileName="trace-ags"+nAgents+"-steps"+nStep+"-cf"+maxConfidence+"-qol"+qoL+"-"+n+".txt";			
 				f=new File(path+fileName);
 				n++;
 			}while(f.exists());
@@ -187,7 +187,7 @@ public class ENV  extends Environment{
 		if (action.getFunctor().equals(hd)) {
 			
         	//h distance between 2 agents
-			int distance=getHummingDistance(action.getTerm(0).toString(),action.getTerm(1).toString());
+			int distance=gethammingDistance(action.getTerm(0).toString(),action.getTerm(1).toString());
 			
 			//inform student agent the interest distance
 			addPercept(ag,Literal.parseLiteral("interestDistance("+distance+")"));
@@ -196,7 +196,7 @@ public class ENV  extends Environment{
 		if (action.getFunctor().equals(hde)) {
 			
         	//h distance between agent and environment and probability of successful learning
-			int distance=getHummingDistance(action.getTerm(0).toString().replaceAll("\"",""),realString);
+			int distance=gethammingDistance(action.getTerm(0).toString().replaceAll("\"",""),realString);
         	
 			double punteggio=Math.random()*realString.length();
 			
@@ -276,13 +276,20 @@ public class ENV  extends Environment{
 		
 		//when all agents are ready
 		if(readyAgent == coupleList.size()*2){
+			
+			//logger.info("all agents have reseted their believes: "+readyAgent+"/"+nAgents);
+			
 			step++;
 			clearAllPercepts();
+	
 			if(step <nStep){
 				readyAgent = 0;
 				generateCoupleList();
 				startACycle();
 			}
+			
+			//logger.info("new cycle already started... ");
+			
 			printAgentsPossession();
 		}
 	}
@@ -326,7 +333,7 @@ public class ENV  extends Environment{
 			return null;
 	}
 	
-	public int getHummingDistance(String s1,String s2){
+	public int gethammingDistance(String s1,String s2){
 		
 		if(s1.length()!=s2.length()){
 			System.out.println("ERRORE: #001 STRINGHE DIVERSE "+s1+":"+s1.length()+" "+s2+":"+s2.length());
@@ -398,21 +405,25 @@ public class ENV  extends Environment{
 	void printAgentsPossession(){
 		double media=0;
 		 
-		logger.info("===============  START AGENTE REPORT ["+step+"/"+nStep+"]==========");
+		
 		for(int i = 0 ; i< agentList.size(); i++){
 			Agent a = agentList.get(i);
-			int d=getHummingDistance(a.myString.replaceAll("\"",""),realString);
+			int d=gethammingDistance(a.myString.replaceAll("\"",""),realString);
 			media+=d;
 			if(step%20==0){
+				logger.info("===============  START AGENTE REPORT ["+step+"/"+nStep+"]==========");
 				logger.info("DUMMY"+(i+1)+": myString: "+a.myString+", myConfidence: "+a.myConfidence+" D="+d);
 				
 			}
 		}
-		if(step%20==0)
-		logger.info("realString: "+realString);
+		
 		media=media/agentList.size();
-		logger.info("Distanza media: "+(realString.length()-media));
+		logger.info("AVG Correct Bits: "+(realString.length()-media)+"["+step+"/"+nStep+"]");
+		
+		if(step%20==0){
+		logger.info("realString: "+realString);
 		logger.info("=============== END AGENTE REPORT [GOAL ORIENTED VERSION] ==============");
+		}
 		save.print(realString.length()-media);
 		if(step>=nStep)
 			save.close(); 

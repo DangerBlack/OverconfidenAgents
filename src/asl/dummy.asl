@@ -69,7 +69,7 @@
 			<-  ?myString(MYSTRING);
 				+teacherString(TEACHERSTRING);
 				printj("now I need to calculate the humming distance ",MYSTRING," =?= ",TEACHERSTRING);
-				hummingDistance(MYSTRING,TEACHERSTRING).
+				hammingDistance(MYSTRING,TEACHERSTRING).
 					
 				
 -!getInterestDistance(_): true
@@ -97,15 +97,15 @@
 
 
 /* STUDENT: test the similarity */
-+?areWeSimilarEnough:interestDistance(D) &  myConfidence(X) & D<=X 
-<- printj("distance ", D ,"<= my confidence" ,X," i am interested to learn ").
++?areWeSimilarEnough:interestDistance(D) &  myConfidence(X) & D<X & D > (X-4)
+<- printj(" D is",D," X is",X," lower bound is",X-4);printj("distance ", D ,"<= my confidence" ,X," i am interested to learn ").
 
 
 
 /* STUDENTE: learn */
 +!learn:true
 <- ?teacherString(TEACHERSTRING);
-	hummingDistanceEnv(TEACHERSTRING). 
+	hammingDistanceEnv(TEACHERSTRING). 
 
 
 -!learn:true
@@ -140,7 +140,11 @@
 				-me(_)[source(_)];
 				-you(_)[source(_)];
 				-teacher(_)[source(_)];
-				-resetBelief[source(_)];
 				-communicate(_,_)[source(_)]; 
+				
+				-reset(_)[source(_)];
+				-newKnowledge(_)[source(_)];
+				-result(_)[source(_)];
+				-interestDistance(_)[source(_)];
 				printj("****CANCELLATE LE MIE CREDENZE");
 				informReady.
