@@ -28,7 +28,7 @@ public class ENV  extends Environment{
      * */
 	
 	//System parameters
-	int nStep=300;
+	int nStep=1000;
 	int step=0;
 	int qoL=5;
 	int maxConfidence=4;
@@ -118,8 +118,10 @@ public class ENV  extends Environment{
 		public void close(){
 			output.close();
 		}
-		public void print(int step,double value){
-			output.println(value);
+		/** it PRINT the Average Correct Bit
+		*/
+		public void print(double ACB){
+			output.println(ACB);
 		}
 	}
     
@@ -411,7 +413,7 @@ public class ENV  extends Environment{
 		media=media/agentList.size();
 		logger.info("Distanza media: "+(realString.length()-media));
 		logger.info("=============== END AGENTE REPORT [GOAL ORIENTED VERSION] ==============");
-		save.print(step,(realString.length()-media));
+		save.print(realString.length()-media);
 		if(step>=nStep)
 			save.close(); 
 	}
@@ -491,7 +493,7 @@ public class ENV  extends Environment{
 
 				int order = (int)(Math.random()*nAgents+1);
 
-				if(order > 50)	
+				if(order > (nAgents/2))	
 					coupleList.add(new Couple(p.id,d.id));
 				else
 					coupleList.add(new Couple(d.id,p.id));
