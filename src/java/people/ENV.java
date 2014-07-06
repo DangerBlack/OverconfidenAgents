@@ -119,7 +119,7 @@ public class ENV  extends Environment{
 			output.close();
 		}
 		public void print(int step,double value){
-			output.println(step+"	"+value);
+			output.println(value);
 		}
 	}
     
