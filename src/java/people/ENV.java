@@ -14,10 +14,9 @@ package people;
 
 import jason.asSyntax.*;
 import jason.environment.Environment;
-
 import java.util.logging.Logger;
 import java.util.*;
-import java.io.*;
+
 
 public class ENV  extends Environment{
 	
@@ -29,9 +28,8 @@ public class ENV  extends Environment{
      * */
 	
 	//System parameters
-	int nStep=1000;
+	int nStep=300;
 	int step=0;
-	int stringLenght=10;
 	int qoL=5;
 	int maxConfidence=4;
 	int minConfidence=4;
@@ -66,7 +64,7 @@ public class ENV  extends Environment{
 
     static Logger logger = Logger.getLogger(ENV.class.getName());
     
-	public SaveTrace save;
+	
     /*
      * ====================================================
      *  		classes
@@ -99,32 +97,6 @@ public class ENV  extends Environment{
 		}
 	}
 	
-	public class SaveTrace{
-		String path="";
-		String fileName="";
-		PrintWriter output;
-		public SaveTrace(){
-			try{
-			int n=0;
-			File f;
-			do{
-				fileName="trace-"+n+"-"+qoL+"-"+nStep+"-"+nAgents+".txt";			
-				f=new File(path+fileName);
-				n++;
-			}while(f.exists());
-			
-			output=new PrintWriter(f);
-			}catch(FileNotFoundException e){
-				logger.info("Error #005 Unable to save file");
-			}
-		}
-		public void close(){
-			output.close();
-		}
-		public void print(int step,double value){
-			output.println(step+"	"+value);
-		}
-	}
     
     /*
      * ====================================================
@@ -142,13 +114,13 @@ public class ENV  extends Environment{
 		realString=generateString();
 		agentList = new ArrayList<Agent>();
 		
+		
         initPercepts();
-		save=new SaveTrace();
         printAgentsPossession();
         generateCoupleList();
-		
+        //generateCoupleList2();
 		startACycle();
-		
+
     }
     
 	
@@ -275,7 +247,7 @@ public class ENV  extends Environment{
 		logger.info("number of ready agents: "+readyAgent+"/"+nAgents);
 		
 		//when all agents are ready
-		if(readyAgent == nAgents){
+		if(readyAgent == coupleList.size()*2){
 			step++;
 			clearAllPercepts();
 			if(step <nStep){
@@ -405,15 +377,15 @@ public class ENV  extends Environment{
 			media+=d;
 			if(step%20==0){
 				logger.info("DUMMY"+(i+1)+": myString: "+a.myString+", myConfidence: "+a.myConfidence+" D="+d);
-				logger.info("realString: "+realString);
+				
 			}
 		}
+		if(step%20==0)
+		logger.info("realString: "+realString);
 		media=media/agentList.size();
 		logger.info("Distanza media: "+(realString.length()-media));
 		logger.info("=============== END AGENTE REPORT [GOAL ORIENTED VERSION] ==============");
-		save.print(step,(realString.length()-media));
-		if(step>=nStep)
-			save.close();
+		 
 	}
 	
     /*
@@ -422,6 +394,23 @@ public class ENV  extends Environment{
      * ====================================================
      * */
 	
+    int generateConfidence(){
+		return (int)(Math.round(Math.random()*(maxConfidence-minConfidence))+minConfidence);
+	}
+
+    String generateString(){
+		String s="";
+		for(int i=0;i<10;i++){
+			if(Math.random()>0.5){
+				s+="0";
+			}else{
+				s+="1";
+			}
+		}
+		return s;
+	}
+    
+	//   ============  PERFECT MATCHING   ============ 
 	void generateCoupleList(){
 		ArrayList<Integer> scoupleList = new ArrayList<Integer>();
 		for(int i=1;i<=nAgents;i++)
@@ -436,21 +425,49 @@ public class ENV  extends Environment{
 			//logger.info(""+coupleList.get(coupleList.size()-1));
 		}
 	}
-    
-    int generateConfidence(){
-		return (int)(Math.round(Math.random()*(maxConfidence-minConfidence))+minConfidence);
-	}
 
-    String generateString(){
-		String s="";
-		for(int i=0;i<stringLenght;i++){
-			if(Math.random()>0.5){
-				s+="0";
-			}else{
-				s+="1";
+    //   ============  FLAW MATCHING   ================
+    public class Dummy{
+		int id;
+		boolean occupied = false;
+
+		public Dummy(int a,boolean b){
+			this.id=a;
+			this.occupied=b;
+		}
+	}
+    
+	ArrayList<Dummy> dlist = new ArrayList<Dummy>();
+	
+	void generateCoupleList2(){
+		coupleList = new ArrayList<Couple>();
+		for(int i=1;i<=nAgents;i++)
+		{
+			//System.out.println("aaa"+(int)(Math.random()*nAgents+1));
+			Dummy d = new Dummy(i,false);
+			dlist.add(d);
+		}   
+		Collections.shuffle(dlist);
+		for(int i=0;i<nAgents;i++)
+		{
+			
+			int parteneridx = (int)(Math.random()*nAgents);
+	
+			Dummy p = dlist.get(parteneridx);
+			Dummy d = dlist.get(i);
+					
+			if(p.id != d.id && !p.occupied && !d.occupied){
+				
+				p.occupied = true;
+				d.occupied = true;
+
+				int order = (int)(Math.random()*nAgents+1);
+
+				if(order > 50)	
+					coupleList.add(new Couple(p.id,d.id));
+				else
+					coupleList.add(new Couple(d.id,p.id));
 			}
 		}
-		return s;
 	}
-
 }
