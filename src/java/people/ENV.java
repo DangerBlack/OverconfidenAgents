@@ -63,7 +63,7 @@ public class ENV  extends Environment{
 	public final String pj = new String("printj");
 
     static Logger logger = Logger.getLogger(ENV.class.getName());
-    
+    public SaveTrace save;
 	
     /*
      * ====================================================
@@ -96,7 +96,32 @@ public class ENV  extends Environment{
 			return "[myString: "+myString+", myConfidence: "+myConfidence+"]";
 		}
 	}
-	
+	public class SaveTrace{
+		String path="";
+		String fileName="";
+		PrintWriter output;
+		public SaveTrace(){
+			try{
+			int n=0;
+			File f;
+			do{
+				fileName="trace-"+n+"-"+qoL+"-"+nStep+"-"+nAgents+".txt";			
+				f=new File(path+fileName);
+				n++;
+			}while(f.exists());
+			
+			output=new PrintWriter(f);
+			}catch(FileNotFoundException e){
+				logger.info("Error #005 Unable to save file");
+			}
+		}
+		public void close(){
+			output.close();
+		}
+		public void print(int step,double value){
+			output.println(step+"	"+value);
+		}
+	}
     
     /*
      * ====================================================
@@ -116,6 +141,7 @@ public class ENV  extends Environment{
 		
 		
         initPercepts();
+		save=new SaveTrace();
         printAgentsPossession();
         generateCoupleList();
         //generateCoupleList2();
@@ -385,7 +411,9 @@ public class ENV  extends Environment{
 		media=media/agentList.size();
 		logger.info("Distanza media: "+(realString.length()-media));
 		logger.info("=============== END AGENTE REPORT [GOAL ORIENTED VERSION] ==============");
-		 
+		save.print(step,(realString.length()-media));
+		if(step>=nStep)
+			save.close(); 
 	}
 	
     /*
