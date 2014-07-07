@@ -97,7 +97,7 @@
 
 
 /* STUDENT: test the similarity */
-+?areWeSimilarEnough:interestDistance(D) &  myConfidence(X) & D<X & D > (X-4)
++?areWeSimilarEnough:interestDistance(D) &  myConfidence(X) & D<=10-X
 <- printj(" D is",D," X is",X," lower bound is",X-4);printj("distance ", D ,"<= my confidence" ,X," i am interested to learn ").
 
 
