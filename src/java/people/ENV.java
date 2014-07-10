@@ -5,9 +5,9 @@
  *
  * Classe L'ambiente della simulazione
  * 
- * @author Baschieri Daniele, daniele.baschieri@studio.unibo.it
- * @author Liu Tong, tong.liu2@studio.unibo.it
- * @version  0.9
+ * @author Baschieri Daniele, daniele.baschieri[at]studio.unibo.it
+ * @author Liu Tong, tong.liu2[at]studio.unibo.it
+ * @version  1.0
  */
 
 package people;

@@ -4,8 +4,6 @@ MAS people {
 
 	environment: people.ENV(100)
 	
-	//executionControl: jason.control.ExecutionControl
-	
 	agents:
 		dummy #100;
 
